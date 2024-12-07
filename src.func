@@ -1,0 +1,3 @@
+id = \x -> x
+compose a b = \x -> a (b x)
+main = print ((\x -> compose x id) (\x -> x + 1) 1)
