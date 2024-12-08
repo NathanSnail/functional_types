@@ -1,37 +1,7 @@
 from dataclasses import dataclass
+from typing import Dict
 
-
-@dataclass
-class Identifier:
-    name: str
-
-
-@dataclass
-class Eq:
-    pass
-
-
-@dataclass
-class Arrow:
-    pass
-
-
-@dataclass
-class LParen:
-    pass
-
-
-@dataclass
-class RParen:
-    pass
-
-
-@dataclass
-class Backslash:
-    pass
-
-
-Token = Eq | Arrow | Backslash | LParen | RParen | Identifier
+from tokens import Arrow, Backslash, Eq, Identifier, LParen, RParen, Token
 
 
 class Expression:
@@ -44,24 +14,38 @@ class Assignment:
     value: Expression
 
 
+def parse_value(toks: list[Token]) -> Expression:
+    pass
+
+
 def parse_statement(toks: list[Token]) -> Expression:
     ptr = 0
+    vars: list[str] = []
     while True:
-        pass
+        cur = toks[ptr]
+        match cur:
+            case Backslash():
+                ptr += 1
+                param_name = toks[ptr]
+                assert (
+                    type(param_name) is Identifier
+                ), "Lambda param is not an identifier"
+                print(param_name)
+                ptr += 1
+                assert type(toks[ptr]) is Arrow, "Lambda missing arrow"
+                ptr += 1
+        ptr += 1
 
 
 def parse_line(toks: list[Token]) -> Assignment:
-    match toks[0]:
-        case Identifier(var_name):
-            name = var_name
-        case x:
-            raise Exception(f"invalid first token {x} in line {toks}")
-    match toks[1]:
-        case Eq():
-            pass
-        case x:
-            raise Exception(f"invalid second token {x} in line {toks}")
-    return Assignment(name, parse_statement(toks[2:]))
+    id = toks[0]
+    assert (
+        type(id) is Identifier
+    ), f"Declaration name {id} is not an identifier for {toks}"
+    assert (
+        type(toks[1]) is Eq
+    ), f"Declaration does not have a equals, has {toks[1]} for {toks}"
+    return Assignment(id.name, parse_statement(toks[2:]))
 
 
 def tokenise_line(src: str) -> list[Token]:
@@ -106,6 +90,7 @@ def tokenise_line(src: str) -> list[Token]:
             case x:
                 build = build + x
         ptr += 1
+    flush_cur()
     return toks
 
 
@@ -114,4 +99,6 @@ def tokenise_src(src: str) -> list[list[Token]]:
 
 
 content = open("./src.func", "r").read()
-print(tokenise_src(content))
+toks = tokenise_src(content)
+print(toks)
+parse_line(toks[0])
