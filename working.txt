@@ -1,0 +1,27 @@
+decl
+  id
+  lambda 0
+    0
+decl
+  compose
+  lambda 0
+    lambda 1
+      lambda 2
+        apply
+          param 0
+          apply
+            param 1
+            param 2
+decl
+  main
+  apply
+    global "show"
+    apply
+      apply
+        lambda 0
+          apply
+            apply "compose"
+              param 0
+            global "id"
+
+      
