@@ -4,36 +4,59 @@ from typing import Dict
 from tokens import Arrow, Backslash, Eq, Identifier, LParen, RParen, Token
 
 
-class Expression:
-    pass
+@dataclass
+class Value:
+    name: str
 
 
 @dataclass
-class Assignment:
-    variable: str
-    value: Expression
+class Lambda:
+    param_name: str
+    body: "Expression"
 
 
-def parse_value(toks: list[Token]) -> Expression:
-    pass
+@dataclass
+class Application:
+    fn: "Expression"
+    val: "Expression"
 
 
-def parse_statement(toks: list[Token]) -> Expression:
+Expression = Value | Lambda | Application
+
+
+def parse_value(toks: list[Token]) -> tuple[Expression, int]:
+    ptr = 0
+    match toks[ptr]:
+        case LParen():
+            ptr += 1
+            (expr, skip) = parse_statement(toks[ptr:])
+            ptr += 1
+            assert type(toks[ptr + skip]) is RParen, "Paren not closed"
+            return (expr, ptr)
+        case Backslash():
+            ptr += 1
+            param_name = toks[ptr]
+            assert (
+                type(param_name) is Identifier
+            ), "Lambda param is not an identifier"
+            print(param_name)
+            ptr += 1
+            assert type(toks[ptr]) is Arrow, "Lambda missing arrow"
+            ptr += 1
+            (val, skip) = parse_statement(toks[ptr:])
+            ptr += skip
+            return (Lambda(param_name.name, val), ptr)
+        case Identifier(name):
+            return (Value(name), 1)
+    assert False, "invalid token for value"
+
+
+def parse_statement(toks: list[Token]) -> tuple[Expression, int]:
     ptr = 0
     vars: list[str] = []
     while True:
         cur = toks[ptr]
         match cur:
-            case Backslash():
-                ptr += 1
-                param_name = toks[ptr]
-                assert (
-                    type(param_name) is Identifier
-                ), "Lambda param is not an identifier"
-                print(param_name)
-                ptr += 1
-                assert type(toks[ptr]) is Arrow, "Lambda missing arrow"
-                ptr += 1
         ptr += 1
 
 
