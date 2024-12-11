@@ -20,7 +20,7 @@ class Lambda:
     body: "Expression"
 
     def __str__(self):
-        return f"{self.param_name} -> {self.body}"
+        return f"\{self.param_name} -> {self.body}"
 
     def __repr__(self):
         # improper but idc
