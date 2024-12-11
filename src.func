@@ -3,3 +3,9 @@ other_id = id id
 another_id = (id)
 compose = \a -> \b -> \x -> a (b x)
 main = show ((\x -> compose x id) (\x -> add x 1) 1)
+
+id2 = x -> x
+other_id2 = id(id)
+another_id2 = id
+compose2 = a -> b -> x -> a(b(x))
+main2 = show(x -> compose(x)(id)(x -> add(x)(1))(1))
