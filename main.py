@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict
 
 from tokens import Arrow, Backslash, Eq, Identifier, LParen, RParen, Token
 
@@ -8,17 +7,36 @@ from tokens import Arrow, Backslash, Eq, Identifier, LParen, RParen, Token
 class Value:
     name: str
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return str(self)
+
 
 @dataclass
 class Lambda:
     param_name: str
     body: "Expression"
 
+    def __str__(self):
+        return f"{self.param_name} -> {self.body}"
+
+    def __repr__(self):
+        # improper but idc
+        return str(self)
+
 
 @dataclass
 class Application:
     fn: "Expression"
     val: "Expression"
+
+    def __str__(self):
+        return f"{self.fn}({self.val})"
+
+    def __repr__(self):
+        return str(self)
 
 
 Expression = Value | Lambda | Application
@@ -28,6 +46,12 @@ Expression = Value | Lambda | Application
 class Assignment:
     name: str
     val: Expression
+
+    def __str__(self):
+        return f"{self.name} = {self.val}"
+
+    def __repr__(self):
+        return str(self)
 
 
 def parse_value(toks: list[Token]) -> tuple[Expression, int]:
@@ -132,5 +156,5 @@ def tokenise_src(src: str) -> list[list[Token]]:
 content = open("./src.func", "r").read()
 toks = tokenise_src(content)
 for line in toks:
-    print(line)
+    # print(line)
     print(parse_line(line))
