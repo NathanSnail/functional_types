@@ -1,4 +1,5 @@
 id = \x -> x
 other_id = id id
+another_id = (id)
 compose = \a -> \b -> \x -> a (b x)
 main = show ((\x -> compose x id) (\x -> add x 1) 1)

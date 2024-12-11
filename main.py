@@ -24,22 +24,26 @@ class Application:
 Expression = Value | Lambda | Application
 
 
+@dataclass
+class Assignment:
+    name: str
+    val: Expression
+
+
 def parse_value(toks: list[Token]) -> tuple[Expression, int]:
     ptr = 0
     match toks[ptr]:
         case LParen():
             ptr += 1
             (expr, skip) = parse_statement(toks[ptr:])
+            ptr += skip
+            assert type(toks[ptr]) is RParen, "Paren not closed"
             ptr += 1
-            assert type(toks[ptr + skip]) is RParen, "Paren not closed"
             return (expr, ptr)
         case Backslash():
             ptr += 1
             param_name = toks[ptr]
-            assert (
-                type(param_name) is Identifier
-            ), "Lambda param is not an identifier"
-            print(param_name)
+            assert type(param_name) is Identifier, "Lambda param is not an identifier"
             ptr += 1
             assert type(toks[ptr]) is Arrow, "Lambda missing arrow"
             ptr += 1
@@ -48,16 +52,17 @@ def parse_value(toks: list[Token]) -> tuple[Expression, int]:
             return (Lambda(param_name.name, val), ptr)
         case Identifier(name):
             return (Value(name), 1)
-    assert False, "invalid token for value"
+    assert False, f"invalid token {toks[ptr]} for value"
 
 
 def parse_statement(toks: list[Token]) -> tuple[Expression, int]:
-    ptr = 0
-    vars: list[str] = []
+    (built, ptr) = parse_value(toks)
     while True:
-        cur = toks[ptr]
-        match cur:
-        ptr += 1
+        if len(toks) == ptr or type(toks[ptr]) is RParen:
+            return (built, ptr)
+        (expr, skip) = parse_value(toks[ptr:])
+        built = Application(built, expr)
+        ptr += skip
 
 
 def parse_line(toks: list[Token]) -> Assignment:
@@ -68,7 +73,10 @@ def parse_line(toks: list[Token]) -> Assignment:
     assert (
         type(toks[1]) is Eq
     ), f"Declaration does not have a equals, has {toks[1]} for {toks}"
-    return Assignment(id.name, parse_statement(toks[2:]))
+    (expr, skip) = parse_statement(toks[2:])
+    if len(toks[2:]) != skip:
+        assert False, f"Not all tokens consumed for line {toks}"
+    return Assignment(id.name, expr)
 
 
 def tokenise_line(src: str) -> list[Token]:
@@ -118,10 +126,11 @@ def tokenise_line(src: str) -> list[Token]:
 
 
 def tokenise_src(src: str) -> list[list[Token]]:
-    return [tokenise_line(x) for x in src.split("\n")]
+    return [x for x in [tokenise_line(x) for x in src.split("\n")] if len(x) != 0]
 
 
 content = open("./src.func", "r").read()
 toks = tokenise_src(content)
-print(toks)
-parse_line(toks[0])
+for line in toks:
+    print(line)
+    print(parse_line(line))
