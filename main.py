@@ -34,9 +34,9 @@ class Lambda:
 
     def __str__(self):
         if PRETTY_LAMBDAS:
-            return f"λ{self.param_name}.{self.body}"
+            return f"(λ{self.param_name}.{self.body})"
         else:
-            return f"\\{self.param_name} -> {self.body}"
+            return f"(\\{self.param_name} -> {self.body})"
 
     def __repr__(self):
         # improper but idc
