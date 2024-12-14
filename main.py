@@ -1,6 +1,19 @@
 from dataclasses import dataclass
 
-from tokens import Arrow, Backslash, Eq, Identifier, LParen, RParen, Token
+from tokens import Arrow, Backslash, Eq, Identifier, IntToken, LParen, RParen, Token
+
+PRETTY_LAMBDAS = True
+
+
+@dataclass
+class LiteralInt:
+    value: int
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 @dataclass
@@ -20,7 +33,10 @@ class Lambda:
     body: "Expression"
 
     def __str__(self):
-        return f"\{self.param_name} -> {self.body}"
+        if PRETTY_LAMBDAS:
+            return f"λ{self.param_name}.{self.body}"
+        else:
+            return f"\\{self.param_name} -> {self.body}"
 
     def __repr__(self):
         # improper but idc
@@ -39,7 +55,7 @@ class Application:
         return str(self)
 
 
-Expression = Value | Lambda | Application
+Expression = Value | Lambda | Application | LiteralInt
 
 
 @dataclass
@@ -74,6 +90,8 @@ def parse_value(toks: list[Token]) -> tuple[Expression, int]:
             (val, skip) = parse_statement(toks[ptr:])
             ptr += skip
             return (Lambda(param_name.name, val), ptr)
+        case IntToken(value):
+            return (LiteralInt(value), 1)
         case Identifier(name):
             return (Value(name), 1)
     assert False, f"invalid token {toks[ptr]} for value"
@@ -112,7 +130,10 @@ def tokenise_line(src: str) -> list[Token]:
         nonlocal build
         if build == "":
             return
-        toks.append(Identifier(build))
+        if build.isdigit():
+            toks.append(IntToken(int(build)))
+        else:
+            toks.append(Identifier(build))
         build = ""
 
     srclen = len(src)
@@ -156,5 +177,4 @@ def tokenise_src(src: str) -> list[list[Token]]:
 content = open("./src.func", "r").read()
 toks = tokenise_src(content)
 for line in toks:
-    # print(line)
     print(parse_line(line))
