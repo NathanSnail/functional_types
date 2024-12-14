@@ -31,4 +31,10 @@ class Backslash:
     pass
 
 
-Token = Eq | Arrow | Backslash | LParen | RParen | Identifier
+@dataclass
+class IntToken:
+    value: int
+    pass
+
+
+Token = Eq | Arrow | Backslash | LParen | RParen | Identifier | IntToken
