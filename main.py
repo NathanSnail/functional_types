@@ -1,19 +1,9 @@
 from dataclasses import dataclass
 
-from tokens import Arrow, Backslash, Eq, Identifier, IntToken, LParen, RParen, Token
+from tokens import (Arrow, Backslash, Eq, Identifier, LiteralInt, LParen,
+                    RParen, Token)
 
 PRETTY_LAMBDAS = True
-
-
-@dataclass
-class LiteralInt:
-    value: int
-
-    def __str__(self) -> str:
-        return str(self.value)
-
-    def __repr__(self) -> str:
-        return str(self)
 
 
 @dataclass
@@ -77,24 +67,30 @@ def parse_value(toks: list[Token]) -> tuple[Expression, int]:
             ptr += 1
             (expr, skip) = parse_statement(toks[ptr:])
             ptr += skip
-            assert type(toks[ptr]) is RParen, "Paren not closed"
+            assert (
+                type(toks[ptr]) is RParen
+            ), f"Paren not closed, got {toks[ptr]} and had {toks}"
             ptr += 1
             return (expr, ptr)
         case Backslash():
             ptr += 1
             param_name = toks[ptr]
-            assert type(param_name) is Identifier, "Lambda param is not an identifier"
+            assert (
+                type(param_name) is Identifier
+            ), f"Lambda param is not an identifier, got {param_name} and had {toks}"
             ptr += 1
-            assert type(toks[ptr]) is Arrow, "Lambda missing arrow"
+            assert (
+                type(toks[ptr]) is Arrow
+            ), f"Lambda missing arrow, got {toks[ptr]} and had {toks}"
             ptr += 1
             (val, skip) = parse_statement(toks[ptr:])
             ptr += skip
             return (Lambda(param_name.name, val), ptr)
-        case IntToken(value):
+        case LiteralInt(value):
             return (LiteralInt(value), 1)
         case Identifier(name):
             return (Value(name), 1)
-    assert False, f"invalid token {toks[ptr]} for value"
+    assert False, f"invalid token {toks[ptr]} for value, had {toks}"
 
 
 def parse_statement(toks: list[Token]) -> tuple[Expression, int]:
@@ -117,7 +113,9 @@ def parse_line(toks: list[Token]) -> Assignment:
     ), f"Declaration does not have a equals, has {toks[1]} for {toks}"
     (expr, skip) = parse_statement(toks[2:])
     if len(toks[2:]) != skip:
-        assert False, f"Not all tokens consumed for line {toks}"
+        assert (
+            False
+        ), f"Not all tokens consumed for line {toks}, had {toks[2+skip:]} remaining"
     return Assignment(id.name, expr)
 
 
@@ -130,8 +128,8 @@ def tokenise_line(src: str) -> list[Token]:
         nonlocal build
         if build == "":
             return
-        if build.isdigit():
-            toks.append(IntToken(int(build)))
+        if (build[0] == "-" and build[1:].isdigit()) or build.isdigit():
+            toks.append(LiteralInt(int(build)))
         else:
             toks.append(Identifier(build))
         build = ""
@@ -151,9 +149,9 @@ def tokenise_line(src: str) -> list[Token]:
                 cur = "-"
             case ">":
                 if cur != ">":
-                    raise Exception(
-                        f"Error when tokenising '{src}' > from -> without 1 - preceeding, had {cur}"
-                    )
+                    assert (
+                        False
+                    ), f"Error when tokenising '{src}' > from -> without 1 - preceeding, had {cur}"
                 toks.append(Arrow())
             case "(":
                 flush_cur()

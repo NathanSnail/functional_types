@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from main import LiteralInt
+
 
 @dataclass
 class Identifier:
@@ -32,9 +34,14 @@ class Backslash:
 
 
 @dataclass
-class IntToken:
+class LiteralInt:
     value: int
-    pass
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
-Token = Eq | Arrow | Backslash | LParen | RParen | Identifier | IntToken
+Token = Eq | Arrow | Backslash | LParen | RParen | Identifier | LiteralInt
