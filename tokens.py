@@ -38,8 +38,7 @@ class LiteralInt:
     def __str__(self) -> str:
         return str(self.value)
 
-    def __repr__(self) -> str:
-        return str(self)
+    __repr__ = __str__
 
 
 Token = Eq | Arrow | Backslash | LParen | RParen | Identifier | LiteralInt

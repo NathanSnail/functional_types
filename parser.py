@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from tokens import (Arrow, Backslash, Eq, Identifier, LiteralInt, LParen,
                     RParen, Token, tokenise_src)
 
-PRETTY_LAMBDAS = True
+from config import PRETTY_LAMBDAS
 
 
 @dataclass
@@ -13,8 +13,7 @@ class Value:
     def __str__(self):
         return self.name
 
-    def __repr__(self):
-        return str(self)
+    __repr__ = __str__
 
 
 @dataclass
@@ -28,9 +27,7 @@ class Lambda:
         else:
             return f"(\\{self.param_name} -> {self.body})"
 
-    def __repr__(self):
-        # improper but idc
-        return str(self)
+    __repr__ = __str__
 
 
 @dataclass
@@ -41,8 +38,7 @@ class Application:
     def __str__(self):
         return f"{self.fn}({self.val})"
 
-    def __repr__(self):
-        return str(self)
+    __repr__ = __str__
 
 
 Expression = Value | Lambda | Application | LiteralInt
@@ -56,8 +52,7 @@ class Assignment:
     def __str__(self):
         return f"{self.name} = {self.val}"
 
-    def __repr__(self):
-        return str(self)
+    __repr__ = __str__
 
 
 def parse_value(toks: list[Token]) -> tuple[Expression, int]:

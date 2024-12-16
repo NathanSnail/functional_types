@@ -1,4 +1,4 @@
-from parser import parse_src
+from analyse import analyse_src
 
 content = open("./src.func", "r").read()
-print("\n".join([str(x) for x in parse_src(content)]))
+print("\n".join([str(x) for x in analyse_src(content)]))
