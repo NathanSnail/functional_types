@@ -79,7 +79,10 @@ def find[T](elements: list[T], match: Callable[[T], bool]) -> tuple[T, int] | No
 
 
 def analyse_impl(
-    expr: Expression, stack: list[tuple[str, int]], id_counter: Ref[int], globals: dict[str, int]
+    expr: Expression,
+    stack: list[tuple[str, int]],
+    id_counter: Ref[int],
+    globals: dict[str, int],
 ) -> TypableExpr:
     match expr:
         case Value(name):
@@ -101,12 +104,21 @@ def analyse_impl(
         case LiteralInt(v):
             return LiteralInt(v)
 
+
 def analyse(program: list[Assignment]) -> list[TypableAssignment]:
     globals = {assignment.name: index for index, assignment in enumerate(program)}
-    globals["show"] = -1
-    globals["add"] = -2
     id_counter = Ref(0)
-    return [TypableAssignment(assignment.name, analyse_impl(assignment.val, [], id_counter, globals)) for assignment in program]
+    globals["show"] = id_counter[:]
+    id_counter *= id_counter[:] + 1
+    globals["add"] = id_counter[:]
+    id_counter *= id_counter[:] + 1
+    return [
+        TypableAssignment(
+            assignment.name, analyse_impl(assignment.val, [], id_counter, globals)
+        )
+        for assignment in program
+    ]
+
 
 def analyse_src(src: str) -> list[TypableAssignment]:
     return analyse(parse_src(src))
